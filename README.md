@@ -32,19 +32,24 @@ bash scripts/check-prereqs.sh
 
 ## Running infrastructure (Consul) and the services
 
+Consul now lives in the [my_elk_stack](../my_elk_stack) compose project and is shared with this
+project over an external Docker network (`lab-network`). Start that project first so the network
+and Consul container exist:
+
+```bash
+cd ../my_elk_stack
+docker compose up -d
+```
+
+Then, from this repo:
+
 ```bash
 docker compose up -d --build
 ```
 
-This builds and starts Consul plus all three services (`device-status`, `data-store`,
-`device-control`), each pointed at the `consul` container via `SPRING_CLOUD_CONSUL_HOST`.
+This builds and starts all three services (`device-status`, `data-store`, `device-control`), each
+pointed at the `consul` container (reachable over `lab-network`) via `SPRING_CLOUD_CONSUL_HOST`.
 Consul UI is available at http://localhost:8500.
-
-To run just Consul (and build/run services yourself via Maven instead):
-
-```bash
-docker compose up -d consul
-```
 
 ## Building
 
@@ -104,7 +109,8 @@ variables if services aren't on their default localhost ports.
 ```
 spring_box/
 ├── pom.xml                  # parent aggregator POM
-├── docker-compose.yml       # local Consul instance
+├── docker-compose.yml       # device-status/data-store/device-control (joins the
+│                            # external lab-network for Consul, shared with my_elk_stack)
 ├── scripts/
 │   ├── check-prereqs.ps1
 │   └── check-prereqs.sh
